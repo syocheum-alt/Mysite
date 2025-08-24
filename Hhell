@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Personality Quiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React + ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion/dist/framer-motion.umd.js"></script>
+  </head>
+  <body class="bg-black">
+    <div id="root"></div>
+
+    <script type="text/javascript">
+      const { useState } = React;
+      const { motion, AnimatePresence } = window["framer-motion"];
+
+      function PersonalityQuizSite() {
+        const introTexts = [
+          "안녕하세요. 저는 인공지능 파랑입니다.",
+          "당신의 인성 점수를 알고 싶다면 모든 질문에 정직하게 대답하셔야 합니다.",
+          "만약 정직하게 대답하지 않으면 더 낮은 점수를 받게 됩니다.",
+          "그러니 잘 생각해서 대답해 주세요.",
+          "이제 인성 테스트를 시작하겠습니다.",
+        ];
+
+        const questions = [
+          "당신은 낯선 사람이 어려움에 처했을 때 도와준 적이 있나요?",
+          "당신은 친구의 어려움을 모른 척하지 않는 사람인가요?",
+          "당신은 혼자 밥을 먹을 때 외로움을 느낀 적이 있나요?",
+          "당신은 혼자 밥 먹는 친구를 보았을 때 도와주려고 노력하나요?",
+          "당신은 타인의 잘못을 용서한 적이 있습니까?",
+          "당신은 자신이 잘못했을 때 인정하고 사과한 적이 있습니까?",
+          "장어는 데리야끼인가요 소금구이인가요?",
+        ];
+
+        const [showIntro, setShowIntro] = useState(true);
+        const [introIndex, setIntroIndex] = useState(0);
+        const [questionIndex, setQuestionIndex] = useState(0);
+        const [answers, setAnswers] = useState({});
+        const [clicked, setClicked] = useState(null);
+        const [showLastNotice, setShowLastNotice] = useState(false);
+        const [finished, setFinished] = useState(false);
+
+        const handleNextIntro = () => {
+          if (introIndex < introTexts.length - 1) {
+            setIntroIndex(introIndex + 1);
+          } else {
+            setShowIntro(false);
+          }
+        };
+
+        const handleAnswer = (ans) => {
+          setClicked(ans);
+          setAnswers((prev) => ({ ...prev, [questionIndex]: ans }));
+          setTimeout(() => {
+            setClicked(null);
+            if (questionIndex < questions.length - 1) {
+              if (questionIndex === questions.length - 2) {
+                setShowLastNotice(true);
+                setTimeout(() => {
+                  setShowLastNotice(false);
+                  setQuestionIndex((prev) => prev + 1);
+                }, 2000);
+              } else {
+                setQuestionIndex((prev) => prev + 1);
+              }
+            } else {
+              setFinished(true);
+            }
+          }, 400);
+        };
+
+        return (
+          React.createElement("div", {
+            className:
+              "min-h-screen flex items-center justify-center text-center p-6 select-none relative overflow-hidden bg-black font-['Orbitron']",
+            onClick: showIntro ? handleNextIntro : undefined,
+            children: [
+              React.createElement("div", {
+                className:
+                  "absolute inset-0 bg-gradient-to-b from-black via-indigo-950 to-black animate-pulse z-0",
+              }),
+              React.createElement(
+                "div",
+                { className: "absolute w-full h-full overflow-hidden z-0" },
+                Array.from({ length: 70 }).map((_, i) =>
+                  React.createElement(motion.div, {
+                    key: i,
+                    className: "absolute w-1 h-1 bg-white rounded-full shadow-lg",
+                    initial: { opacity: 0 },
+                    animate: { opacity: [0, 1, 0] },
+                    transition: {
+                      duration: Math.random() * 3 + 2,
+                      repeat: Infinity,
+                      delay: Math.random() * 5,
+                    },
+                    style: {
+                      top: `${Math.random() * 100}%`,
+                      left: `${Math.random() * 100}%`,
+                    },
+                  })
+                )
+              ),
+              React.createElement(AnimatePresence, { mode: "wait" },
+                showIntro
+                  ? React.createElement(
+                      motion.div,
+                      {
+                        key: introIndex,
+                        initial: { opacity: 0, scale: 0.9 },
+                        animate: { opacity: 1, scale: 1 },
+                        exit: { opacity: 0, scale: 1.1 },
+                        transition: { duration: 0.6 },
+                        className:
+                          "text-3xl sm:text-5xl font-extrabold drop-shadow-[0_0_20px_rgba(0,255,255,0.7)] text-cyan-200 z-10",
+                      },
+                      introTexts[introIndex]
+                    )
+                  : showLastNotice
+                  ? React.createElement(
+                      motion.div,
+                      {
+                        key: "last-notice",
+                        initial: { opacity: 0, scale: 0.8 },
+                        animate: { opacity: 1, scale: 1 },
+                        exit: { opacity: 0 },
+                        transition: { duration: 0.6 },
+                        className:
+                          "text-3xl sm:text-5xl font-extrabold text-amber-300 drop-shadow-[0_0_15px_rgba(255,200,0,0.8)] z-10",
+                      },
+                      "마지막 질문입니다."
+                    )
+                  : finished
+                  ? React.createElement(
+                      motion.div,
+                      {
+                        key: "result",
+                        initial: { opacity: 0, y: 50 },
+                        animate: { opacity: 1, y: 0 },
+                        transition: { duration: 0.8 },
+                        className:
+                          "flex flex-col items-center gap-6 z-10",
+                      },
+                      [
+                        React.createElement(
+                          "div",
+                          {
+                            className:
+                              "text-4xl sm:text-5xl font-extrabold text-cyan-300 drop-shadow-[0_0_25px_rgba(0,255,255,0.9)]",
+                          },
+                          "테스트 완료 🎉"
+                        ),
+                        React.createElement(
+                          "div",
+                          {
+                            className:
+                              "text-lg sm:text-2xl text-white/90 max-w-xl",
+                          },
+                          "당신의 답변은 AI에 의해 분석되었습니다. 결과는 “따뜻한 마음을 가진 사람” 입니다. (농담이에요 😎 결과 계산은 나중에 추가!)"
+                        ),
+                      ]
+                    )
+                  : React.createElement(
+                      motion.div,
+                      {
+                        key: questionIndex,
+                        initial: { opacity: 0, y: 40 },
+                        animate: { opacity: 1, y: 0 },
+                        exit: { opacity: 0, y: -40 },
+                        transition: { duration: 0.5 },
+                        className:
+                          "flex flex-col items-center gap-10 z-10",
+                      },
+                      [
+                        React.createElement(
+                          "div",
+                          {
+                            className:
+                              "text-2xl sm:text-4xl font-bold drop-shadow-[0_0_15px_rgba(0,200,255,0.7)] text-white",
+                          },
+                          questions[questionIndex]
+                        ),
+                        React.createElement(
+                          "div",
+                          { className: "flex gap-6" },
+                          [
+                            React.createElement(
+                              motion.button,
+                              {
+                                whileHover: { scale: 1.1 },
+                                whileTap: { scale: 0.95 },
+                                className:
+                                  "px-8 py-4 rounded-2xl font-bold text-lg transition backdrop-blur-md border border-white/20 shadow-xl " +
+                                  (clicked === "예"
+                                    ? "scale-110 bg-gradient-to-r from-green-300 to-green-500 text-black shadow-[0_0_25px_rgba(0,255,0,0.7)]"
+                                    : "bg-white/10 hover:bg-white/20 text-green-200"),
+                                onClick: () => handleAnswer("예"),
+                              },
+                              "예"
+                            ),
+                            React.createElement(
+                              motion.button,
+                              {
+                                whileHover: { scale: 1.1 },
+                                whileTap: { scale: 0.95 },
+                                className:
+                                  "px-8 py-4 rounded-2xl font-bold text-lg transition backdrop-blur-md border border-white/20 shadow-xl " +
+                                  (clicked === "아니오"
+                                    ? "scale-110 bg-gradient-to-r from-red-300 to-red-500 text-black shadow-[0_0_25px_rgba(255,0,0,0.7)]"
+                                    : "bg-white/10 hover:bg-white/20 text-red-200"),
+                                onClick: () => handleAnswer("아니오"),
+                              },
+                              "아니오"
+                            ),
+                          ]
+                        ),
+                      ]
+                    )
+              ),
+            ],
+          })
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(
+        React.createElement(PersonalityQuizSite)
+      );
+    </script>
+  </body>
+</html>
